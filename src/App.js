@@ -7,7 +7,6 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>QR Code Scanner</h1>
-        <p>Scan a QR code to see its content</p>
       </header>
       <main className="App-main">
         <QRScanner />

@@ -1,30 +1,34 @@
 .App {
   text-align: center;
   min-height: 100vh;
+  height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  overflow: hidden;
 }
 
 .App-header {
-  padding: 20px;
+  padding: 10px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
 }
 
 .App-header h1 {
   margin: 0;
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-}
-
-.App-header p {
-  margin: 0;
-  font-size: 1.2rem;
-  opacity: 0.9;
+  font-size: 1.8rem;
 }
 
 .App-main {
-  padding: 20px;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  padding: 0;
+  margin: 0;
 }

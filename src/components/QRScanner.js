@@ -6,10 +6,15 @@ const QRScanner = () => {
   const [scannedData, setScannedData] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState('');
+  const [cameras, setCameras] = useState([]);
+  const [selectedCamera, setSelectedCamera] = useState('');
   const videoRef = useRef(null);
   const qrScannerRef = useRef(null);
 
   useEffect(() => {
+    // Load available cameras on component mount
+    loadCameras();
+    
     return () => {
       // Cleanup scanner on component unmount
       if (qrScannerRef.current) {
@@ -18,6 +23,23 @@ const QRScanner = () => {
       }
     };
   }, []);
+
+  const loadCameras = async () => {
+    try {
+      const availableCameras = await QrScanner.listCameras(true);
+      setCameras(availableCameras);
+      if (availableCameras.length > 0) {
+        // Prefer back camera (environment) if available, otherwise use first camera
+        const backCamera = availableCameras.find(camera => 
+          camera.label.toLowerCase().includes('back') || 
+          camera.label.toLowerCase().includes('environment')
+        );
+        setSelectedCamera(backCamera ? backCamera.id : availableCameras[0].id);
+      }
+    } catch (err) {
+      console.log('Could not load cameras:', err);
+    }
+  };
 
   const startScanning = async () => {
     try {
@@ -30,7 +52,7 @@ const QRScanner = () => {
         throw new Error('No camera found on this device');
       }
 
-      // Initialize QR scanner
+      // Initialize QR scanner with selected camera
       qrScannerRef.current = new QrScanner(
         videoRef.current,
         (result) => {
@@ -44,6 +66,7 @@ const QRScanner = () => {
           },
           highlightScanRegion: true,
           highlightCodeOutline: true,
+          preferredCamera: selectedCamera || 'environment',
         }
       );
 
@@ -61,6 +84,20 @@ const QRScanner = () => {
     setIsScanning(false);
   };
 
+  const switchCamera = async (cameraId) => {
+    const wasScanning = isScanning;
+    if (wasScanning) {
+      stopScanning();
+    }
+    setSelectedCamera(cameraId);
+    if (wasScanning) {
+      // Small delay to ensure the previous scanner is fully stopped
+      setTimeout(() => {
+        startScanning();
+      }, 100);
+    }
+  };
+
   const clearResult = () => {
     setScannedData('');
     setError('');
@@ -68,6 +105,25 @@ const QRScanner = () => {
 
   return (
     <div className="qr-scanner-container">
+      {/* Camera Selection */}
+      {cameras.length > 1 && !isScanning && (
+        <div className="camera-selection">
+          <label htmlFor="camera-select">Choose Camera:</label>
+          <select
+            id="camera-select"
+            value={selectedCamera}
+            onChange={(e) => switchCamera(e.target.value)}
+            className="camera-select"
+          >
+            {cameras.map((camera) => (
+              <option key={camera.id} value={camera.id}>
+                {camera.label || `Camera ${camera.id}`}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <div className="scanner-controls">
         {!isScanning ? (
           <button onClick={startScanning} className="scan-button">
@@ -92,7 +148,6 @@ const QRScanner = () => {
           <div className="scanner-overlay">
             <div className="scanner-frame"></div>
           </div>
-          <p className="scanning-text">Position the QR code within the frame</p>
         </div>
       )}
 
