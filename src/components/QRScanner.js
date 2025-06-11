@@ -27,14 +27,34 @@ const QRScanner = () => {
   const loadCameras = async () => {
     try {
       const availableCameras = await QrScanner.listCameras(true);
-      setCameras(availableCameras);
-      if (availableCameras.length > 0) {
-        // Prefer back camera (environment) if available, otherwise use first camera
-        const backCamera = availableCameras.find(camera => 
-          camera.label.toLowerCase().includes('back') || 
-          camera.label.toLowerCase().includes('environment')
+      
+      // Filter for only back-facing cameras
+      const backCameras = availableCameras.filter(camera => {
+        const label = camera.label.toLowerCase();
+        const facingMode = camera.facingMode;
+        
+        // Check for back-facing indicators
+        return (
+          label.includes('back') || 
+          label.includes('environment') ||
+          label.includes('rear') ||
+          facingMode === 'environment' ||
+          // If no clear indication, exclude cameras that are clearly front-facing
+          (!label.includes('front') && !label.includes('user') && !label.includes('face') && facingMode !== 'user')
         );
-        setSelectedCamera(backCamera ? backCamera.id : availableCameras[0].id);
+      });
+      
+      // Rename cameras to simple "Camera 1", "Camera 2", etc.
+      const renamedCameras = backCameras.map((camera, index) => ({
+        ...camera,
+        displayName: `Camera ${index + 1}`
+      }));
+      
+      setCameras(renamedCameras);
+      
+      if (renamedCameras.length > 0) {
+        // Select the first back camera
+        setSelectedCamera(renamedCameras[0].id);
       }
     } catch (err) {
       console.log('Could not load cameras:', err);
@@ -117,7 +137,7 @@ const QRScanner = () => {
           >
             {cameras.map((camera) => (
               <option key={camera.id} value={camera.id}>
-                {camera.label || `Camera ${camera.id}`}
+                {camera.displayName}
               </option>
             ))}
           </select>
