@@ -8,6 +8,8 @@ const QRScanner = () => {
   const [error, setError] = useState('');
   const [cameras, setCameras] = useState([]);
   const [selectedCamera, setSelectedCamera] = useState('');
+  const [debugInfo, setDebugInfo] = useState(null);
+  const [showDebug, setShowDebug] = useState(false);
   const videoRef = useRef(null);
   const qrScannerRef = useRef(null);
 
@@ -28,16 +30,21 @@ const QRScanner = () => {
     try {
       const availableCameras = await QrScanner.listCameras(true);
       
-      // Debug: Log all available cameras
-      console.log('All available cameras:', availableCameras);
+      // Create debug information
+      const debugData = {
+        totalCameras: availableCameras.length,
+        allCameras: availableCameras.map(cam => ({
+          label: cam.label,
+          id: cam.id,
+          facingMode: cam.facingMode
+        })),
+        filteredCameras: []
+      };
       
       // Filter for only back-facing cameras
       const backCameras = availableCameras.filter(camera => {
         const label = camera.label.toLowerCase();
         const facingMode = camera.facingMode;
-        
-        // Debug: Log each camera's details
-        console.log(`Camera: ${camera.label}, facingMode: ${facingMode}, ID: ${camera.id}`);
         
         // Check for back-facing indicators (more inclusive for Samsung devices)
         const isBackCamera = (
@@ -53,11 +60,18 @@ const QRScanner = () => {
           (!label.includes('front') && !label.includes('user') && !label.includes('face') && !label.includes('selfie') && facingMode !== 'user')
         );
         
-        console.log(`Camera ${camera.label} - Is back camera: ${isBackCamera}`);
+        if (isBackCamera) {
+          debugData.filteredCameras.push({
+            label: camera.label,
+            id: camera.id,
+            facingMode: camera.facingMode
+          });
+        }
+        
         return isBackCamera;
       });
       
-      console.log('Filtered back cameras:', backCameras);
+      setDebugInfo(debugData);
       
       // Rename cameras to simple "Camera 1", "Camera 2", etc.
       const renamedCameras = backCameras.map((camera, index) => ({
@@ -175,7 +189,49 @@ const QRScanner = () => {
             Clear
           </button>
         )}
+        
+        {debugInfo && (
+          <button 
+            onClick={() => setShowDebug(!showDebug)} 
+            className="debug-button"
+          >
+            {showDebug ? 'Hide' : 'Show'} Camera Info
+          </button>
+        )}
       </div>
+
+      {/* Debug Information Display */}
+      {showDebug && debugInfo && (
+        <div className="debug-info">
+          <h3>Camera Detection Info</h3>
+          <p><strong>Total cameras found:</strong> {debugInfo.totalCameras}</p>
+          <p><strong>Back cameras available:</strong> {debugInfo.filteredCameras.length}</p>
+          
+          <div className="debug-section">
+            <h4>All Detected Cameras:</h4>
+            {debugInfo.allCameras.map((cam, index) => (
+              <div key={index} className="camera-info">
+                <p><strong>Camera {index + 1}:</strong></p>
+                <p>Label: {cam.label}</p>
+                <p>Facing Mode: {cam.facingMode || 'not specified'}</p>
+                <p>ID: {cam.id}</p>
+              </div>
+            ))}
+          </div>
+          
+          <div className="debug-section">
+            <h4>Filtered Back Cameras:</h4>
+            {debugInfo.filteredCameras.map((cam, index) => (
+              <div key={index} className="camera-info filtered">
+                <p><strong>Selected Camera {index + 1}:</strong></p>
+                <p>Label: {cam.label}</p>
+                <p>Facing Mode: {cam.facingMode || 'not specified'}</p>
+                <p>ID: {cam.id}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {isScanning && (
         <div className="video-container">

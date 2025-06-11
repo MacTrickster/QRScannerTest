@@ -45,7 +45,7 @@
   margin-bottom: 20px;
 }
 
-.scan-button, .stop-button, .clear-button, .link-button {
+.scan-button, .stop-button, .clear-button, .link-button, .debug-button {
   padding: 12px 24px;
   font-size: 16px;
   border: none;
@@ -100,6 +100,69 @@
   background-color: #1976D2;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.debug-button {
+  background-color: #9C27B0;
+  color: white;
+}
+
+.debug-button:hover {
+  background-color: #7B1FA2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.debug-info {
+  background-color: rgba(255,255,255,0.95);
+  color: #333;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+  border: 2px solid #9C27B0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.debug-info h3 {
+  margin-top: 0;
+  color: #9C27B0;
+  font-size: 1.3rem;
+}
+
+.debug-info h4 {
+  color: #7B1FA2;
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+.debug-section {
+  margin: 15px 0;
+  border-top: 1px solid #ddd;
+  padding-top: 15px;
+}
+
+.camera-info {
+  background-color: rgba(0,0,0,0.05);
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border-left: 4px solid #ccc;
+}
+
+.camera-info.filtered {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-left-color: #4CAF50;
+}
+
+.camera-info p {
+  margin: 5px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.camera-info strong {
+  color: #333;
 }
 
 .video-container {
@@ -245,7 +308,7 @@
     font-size: 14px;
   }
   
-  .scan-button, .stop-button, .clear-button {
+  .scan-button, .stop-button, .clear-button, .debug-button {
     padding: 10px 20px;
     font-size: 14px;
   }
