@@ -46,7 +46,7 @@ const QRScanner = () => {
         const label = camera.label.toLowerCase();
         const facingMode = camera.facingMode;
         
-        // Check for back-facing indicators (more inclusive for Samsung devices)
+        // Check for back-facing indicators (Samsung-optimized)
         const isBackCamera = (
           label.includes('back') || 
           label.includes('environment') ||
@@ -55,9 +55,10 @@ const QRScanner = () => {
           label.includes('zoom') ||
           label.includes('wide') ||
           label.includes('ultra') ||
+          label.includes('facing back') ||  // Samsung specific
           facingMode === 'environment' ||
-          // If no clear indication, exclude cameras that are clearly front-facing
-          (!label.includes('front') && !label.includes('user') && !label.includes('face') && !label.includes('selfie') && facingMode !== 'user')
+          // Samsung cameras often start with "camera" and don't have front indicators
+          (label.startsWith('camera') && !label.includes('front') && !label.includes('user') && !label.includes('face') && !label.includes('selfie') && facingMode !== 'user')
         );
         
         if (isBackCamera) {
