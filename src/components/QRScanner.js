@@ -28,21 +28,36 @@ const QRScanner = () => {
     try {
       const availableCameras = await QrScanner.listCameras(true);
       
+      // Debug: Log all available cameras
+      console.log('All available cameras:', availableCameras);
+      
       // Filter for only back-facing cameras
       const backCameras = availableCameras.filter(camera => {
         const label = camera.label.toLowerCase();
         const facingMode = camera.facingMode;
         
-        // Check for back-facing indicators
-        return (
+        // Debug: Log each camera's details
+        console.log(`Camera: ${camera.label}, facingMode: ${facingMode}, ID: ${camera.id}`);
+        
+        // Check for back-facing indicators (more inclusive for Samsung devices)
+        const isBackCamera = (
           label.includes('back') || 
           label.includes('environment') ||
           label.includes('rear') ||
+          label.includes('telephoto') ||
+          label.includes('zoom') ||
+          label.includes('wide') ||
+          label.includes('ultra') ||
           facingMode === 'environment' ||
           // If no clear indication, exclude cameras that are clearly front-facing
-          (!label.includes('front') && !label.includes('user') && !label.includes('face') && facingMode !== 'user')
+          (!label.includes('front') && !label.includes('user') && !label.includes('face') && !label.includes('selfie') && facingMode !== 'user')
         );
+        
+        console.log(`Camera ${camera.label} - Is back camera: ${isBackCamera}`);
+        return isBackCamera;
       });
+      
+      console.log('Filtered back cameras:', backCameras);
       
       // Rename cameras to simple "Camera 1", "Camera 2", etc.
       const renamedCameras = backCameras.map((camera, index) => ({
